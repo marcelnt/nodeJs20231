@@ -44,11 +44,26 @@ app.use((request, response, next ) => {
  * Versão: 1.0
  * Data: 14/04/2023
  *******************************************************************************************************/
+    //Criando uma const para realizar o processo de padronização de dados que vão chegar no body da requisição
+    const bodyJSON = bodyParser.json();
+    
+    //Import da controller do Aluno
+    var controllerAluno = require('./controller/controller_aluno.js');
 
     //EndPoint: Retorna todos os dados de alunos
     app.get('/v1/lion-school/aluno', cors(), async function(request, response){
+  
+        //solicita a controller que retorne todos os alunos do BD
+        let dados = await controllerAluno.selecionarTodosAlunos();
 
-
+        //Valida se existem registros para retornar na requisição
+        if(dados){
+            response.json(dados);
+            response.status(200);
+        }else{
+            response.json();
+            response.status(404);
+        }
     });
 
     //EndPoint: Retorna dados do aluno pelo ID
@@ -58,8 +73,19 @@ app.use((request, response, next ) => {
     });
 
     //EndPoint: Inserir um novo aluno
-    app.post('/v1/lion-school/aluno', cors(), async function(request, response){
+    app.post('/v1/lion-school/aluno', cors(), bodyJSON, async function(request, response){
+        
+        //Recebe os dados encaominhados no body da requisição
+        let dadosBody = request.body;
+       
+      
 
+        //Envia os dados para a controller
+        let resultInsertDados = await controllerAluno.inserirAluno(dadosBody);
+        console.log(resultInsertDados);
+        //Retorna o status code e a message
+        response.status(resultInsertDados.status);
+        response.json(resultInsertDados)
 
     });
 
@@ -74,4 +100,9 @@ app.use((request, response, next ) => {
 
 
     });
+
+    app.listen(8080, function(){
+        console.log('Servidor aguardando requisições na porta 8080!')
+    });
+
 
